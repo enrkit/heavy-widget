@@ -1,0 +1,13 @@
+{
+  "name": "heavy-widget",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Syncs Instagram media into a static JSON feed for a marquee-style gallery widget.",
+  "scripts": {
+    "sync": "node scripts/fetch-instagram.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

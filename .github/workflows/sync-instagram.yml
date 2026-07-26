@@ -1,0 +1,42 @@
+name: Sync Instagram Feed
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch Instagram media
+        id: fetch
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: node scripts/fetch-instagram.mjs
+
+      - name: Commit updated feed
+        run: |
+          git config user.name "instagram-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/feed.json
+          git diff --cached --quiet || git commit -m "chore: sync instagram feed"
+          git push
+
+      - name: Rotate IG_ACCESS_TOKEN secret if refreshed
+        if: steps.fetch.outputs.token_refreshed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh secret set IG_ACCESS_TOKEN --repo "${{ github.repository }}" --body "${{ steps.fetch.outputs.new_token }}"
