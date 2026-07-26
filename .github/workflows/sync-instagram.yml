@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Fetch Instagram media
         id: fetch
         env:
@@ -30,9 +33,12 @@ jobs:
         run: |
           git config user.name "instagram-sync-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/feed.json
+          git add data/feed.json data/images
           git diff --cached --quiet || git commit -m "chore: sync instagram feed"
           git push
+
+      - name: Purge jsDelivr cache for feed.json
+        run: curl -s "https://purge.jsdelivr.net/gh/enrkit/heavy-widget@main/data/feed.json"
 
       - name: Rotate IG_ACCESS_TOKEN secret if refreshed
         if: steps.fetch.outputs.token_refreshed == 'true'
