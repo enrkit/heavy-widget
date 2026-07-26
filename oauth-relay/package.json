@@ -1,0 +1,14 @@
+{
+  "name": "ig-oauth-relay",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0",
+    "@cloudflare/workers-types": "^5.0.0",
+    "typescript": "^5.5.0"
+  }
+}

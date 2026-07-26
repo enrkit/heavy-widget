@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ig-oauth-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-01",
+  "observability": {
+    "enabled": true
+  },
+  "kv_namespaces": [
+    { "binding": "TOKENS", "id": "fc4fd331afeb4de4ad1b56a725c23eaf" }
+  ]
+}
