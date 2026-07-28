@@ -44,5 +44,6 @@ jobs:
         if: steps.fetch.outputs.token_refreshed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+          NEW_TOKEN: ${{ steps.fetch.outputs.new_token }}
         run: |
-          gh secret set IG_ACCESS_TOKEN --repo "${{ github.repository }}" --body "${{ steps.fetch.outputs.new_token }}"
+          gh secret set IG_ACCESS_TOKEN --repo "${{ github.repository }}" --body "$NEW_TOKEN"

@@ -35,6 +35,21 @@ const ERROR_PAGE = (message: string) => `<!doctype html>
 </body>
 </html>`;
 
+// Hashing both sides to a fixed-length digest before comparing avoids leaking
+// either the input length or per-byte timing through a naive `!==`/loop compare.
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
+  const enc = new TextEncoder();
+  const [aDigest, bDigest] = await Promise.all([
+    crypto.subtle.digest('SHA-256', enc.encode(a)),
+    crypto.subtle.digest('SHA-256', enc.encode(b)),
+  ]);
+  const aBytes = new Uint8Array(aDigest);
+  const bBytes = new Uint8Array(bDigest);
+  let diff = 0;
+  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i];
+  return diff === 0;
+}
+
 async function exchangeCodeForShortLivedToken(
   code: string,
   redirectUri: string,
@@ -78,20 +93,43 @@ async function exchangeForLongLivedToken(shortLivedToken: string, env: Env): Pro
   return data.access_token;
 }
 
+// The KV key must come from the authenticated Instagram account itself, never
+// from a caller-supplied query param — otherwise anyone who completes their
+// own OAuth consent could pick an arbitrary `state` and overwrite another
+// client's stored token.
+async function fetchInstagramUserId(accessToken: string): Promise<string> {
+  const url = new URL('https://graph.instagram.com/me');
+  url.searchParams.set('fields', 'id');
+  url.searchParams.set('access_token', accessToken);
+
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    throw new Error(`Failed to resolve Instagram account id (${res.status}): ${await res.text()}`);
+  }
+  const data = (await res.json()) as { id: string };
+  return data.id;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
     if (url.pathname === '/admin') {
-      if (url.searchParams.get('key') !== env.ADMIN_KEY) {
+      const providedKey = url.searchParams.get('key') ?? '';
+      if (!(await timingSafeEqual(providedKey, env.ADMIN_KEY))) {
         return new Response('Unauthorized', { status: 401 });
       }
       const list = await env.TOKENS.list();
       const entries = await Promise.all(
-        list.keys.map(async (k) => ({
-          client: k.name,
-          value: JSON.parse((await env.TOKENS.get(k.name)) || '{}'),
-        })),
+        list.keys.map(async (k) => {
+          const value = JSON.parse((await env.TOKENS.get(k.name)) || '{}');
+          return {
+            igUserId: k.name,
+            label: value.label ?? null,
+            obtainedAt: value.obtainedAt ?? null,
+            hasToken: Boolean(value.accessToken),
+          };
+        }),
       );
       return new Response(JSON.stringify(entries, null, 2), {
         headers: { 'Content-Type': 'application/json' },
@@ -112,10 +150,11 @@ export default {
       const redirectUri = `${url.origin}${url.pathname}`;
       const shortLived = await exchangeCodeForShortLivedToken(code, redirectUri, env);
       const longLived = await exchangeForLongLivedToken(shortLived, env);
+      const igUserId = await fetchInstagramUserId(longLived);
 
       await env.TOKENS.put(
-        state,
-        JSON.stringify({ accessToken: longLived, obtainedAt: new Date().toISOString() }),
+        igUserId,
+        JSON.stringify({ accessToken: longLived, obtainedAt: new Date().toISOString(), label: state }),
       );
 
       return new Response(THANK_YOU_PAGE, { headers: { 'Content-Type': 'text/html' } });
