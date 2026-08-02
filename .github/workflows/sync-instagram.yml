@@ -27,6 +27,7 @@ jobs:
         id: fetch
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_MEDIA_LIMIT: '8'
         run: node scripts/fetch-instagram.mjs
 
       - name: Commit updated feed

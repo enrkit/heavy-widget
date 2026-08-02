@@ -3,7 +3,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN;
-const MEDIA_LIMIT = Number(process.env.IG_MEDIA_LIMIT || 24);
+const MEDIA_LIMIT = Number(process.env.IG_MEDIA_LIMIT || 8);
 // Displayed at 420px wide in the marquee; 880px gives headroom for ~2x/retina
 // screens without shipping Instagram's full original resolution (often 1-2MB).
 const MAX_WIDTH = 880;
