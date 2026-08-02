@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-02T08:30:52.416Z",
+  "updatedAt": "2026-08-02T23:35:05.618Z",
   "photos": [
     {
       "id": "17873286318688037",
@@ -56,20 +56,6 @@
       "imageUrl": "https://cdn.jsdelivr.net/gh/enrkit/heavy-widget@main/data/images/17958343208981329.webp",
       "permalink": "https://www.instagram.com/p/DbQwNJyDeXd/",
       "timestamp": "2026-07-26T15:51:25+0000"
-    },
-    {
-      "id": "18159444541446183",
-      "caption": "",
-      "imageUrl": "https://cdn.jsdelivr.net/gh/enrkit/heavy-widget@main/data/images/18159444541446183.webp",
-      "permalink": "https://www.instagram.com/p/DbQwKjcjWWR/",
-      "timestamp": "2026-07-26T15:51:03+0000"
-    },
-    {
-      "id": "18090579470113962",
-      "caption": "",
-      "imageUrl": "https://cdn.jsdelivr.net/gh/enrkit/heavy-widget@main/data/images/18090579470113962.webp",
-      "permalink": "https://www.instagram.com/p/DbQv13VjYA8/",
-      "timestamp": "2026-07-26T15:48:14+0000"
     }
   ]
 }
